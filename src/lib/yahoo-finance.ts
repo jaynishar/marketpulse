@@ -8,7 +8,7 @@ import { StockData, OHLCVBar } from '@/types';
 
 export async function getStockData(ticker: string): Promise<StockData> {
   try {
-    const result = await yahooFinance.quote(ticker);
+    const result = await yahooFinance.quote(ticker) as any;
     
     if (!result) {
       throw new Error(`No data found for ${ticker}`);
@@ -54,7 +54,7 @@ export async function getOHLCV(ticker: string, period: '1mo' | '3mo' | '6mo' | '
       period1: startDate,
       period2: endDate,
       interval: '1d',
-    });
+    }) as any[];
 
     return result.map(bar => ({
       time: bar.date.toISOString().split('T')[0],
@@ -75,11 +75,11 @@ export async function searchStocks(query: string): Promise<{ticker: string, name
     const result = await yahooFinance.search(query, {
       quotesCount: 10,
       newsCount: 0,
-    });
+    }) as any;
 
     return result.quotes
-      .filter(q => q.symbol.endsWith('.NS') || q.symbol.endsWith('.BO'))
-      .map(q => ({
+      .filter((q: any) => q.symbol.endsWith('.NS') || q.symbol.endsWith('.BO'))
+      .map((q: any) => ({
         ticker: q.symbol,
         name: (q as any).shortname || (q as any).longname || q.symbol,
         exchange: q.symbol.endsWith('.NS') ? 'NSE' : 'BSE',

@@ -54,9 +54,11 @@ export default function AIAnalysisPanel({ analysis, generatedAt, onRefresh, load
           </div>
         ) : (
           <div className="relative">
-            <ReactMarkdown className="markdown-content">
-              {displayText || analysis}
-            </ReactMarkdown>
+            <div className="markdown-content">
+              <ReactMarkdown>
+                {displayText || analysis}
+              </ReactMarkdown>
+            </div>
             <div className="mt-8 pt-4 border-t border-border/50 flex justify-between items-center text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
               <span>Model: Groq LLaMA 3.3</span>
               <span>Refreshed: {new Date(generatedAt).toLocaleTimeString()}</span>

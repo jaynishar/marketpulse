@@ -1,7 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickData, LineData } from "lightweight-charts";
+import { 
+  createChart, 
+  ColorType, 
+  IChartApi, 
+  ISeriesApi, 
+  CandlestickData, 
+  LineData,
+  CandlestickSeries,
+  LineSeries,
+  HistogramSeries
+} from "lightweight-charts";
 import { OHLCVBar, TechnicalIndicators } from "@/types";
 import { calculateEMA, calculateSupertrend } from "@/lib/technical-analysis";
 
@@ -37,7 +47,7 @@ export default function StockChart({ data, indicators, ticker }: StockChartProps
 
     chartRef.current = chart;
 
-    const candlestickSeries = chart.addCandlestickSeries({
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
       upColor: "#00d084",
       downColor: "#ff4757",
       borderVisible: false,
@@ -61,9 +71,9 @@ export default function StockChart({ data, indicators, ticker }: StockChartProps
     const ema50Data = calculateEMA(closes, 50);
     const ema200Data = calculateEMA(closes, 200);
 
-    const createLine = (color: string, width: number) => chart.addLineSeries({
+    const createLine = (color: string, width: number) => chart.addSeries(LineSeries, {
       color,
-      lineWidth: width,
+      lineWidth: width as any,
       lastValueVisible: false,
       priceLineVisible: false,
     });
@@ -77,7 +87,7 @@ export default function StockChart({ data, indicators, ticker }: StockChartProps
     ema200Series.setData(data.map((d, i) => ({ time: d.time as string, value: ema200Data[i] || d.close })));
 
     // Volume Histogram
-    const volumeSeries = chart.addHistogramSeries({
+    const volumeSeries = chart.addSeries(HistogramSeries, {
       color: "#1f2937",
       priceFormat: { type: "volume" },
       priceScaleId: "", // overlay
