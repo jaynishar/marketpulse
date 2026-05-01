@@ -10,6 +10,7 @@ import { LogOut, LayoutDashboard, Search, RefreshCw } from "lucide-react";
 
 export default function DashboardPage() {
   const [timeframe, setTimeframe] = useState<'SHORT' | 'MEDIUM' | 'LONG'>('SHORT');
+  // Deployment Sync: v1.0.1 - Ensuring regex flags are removed
   const [marketSentiment, setMarketSentiment] = useState<{ sentiment: string, reasoning: string } | null>(null);
   const router = useRouter();
 
