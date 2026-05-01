@@ -78,7 +78,9 @@ export default function DashboardPage() {
               </div>
               <div className="flex-1 px-6 py-3 flex items-center border-t md:border-t-0 md:border-l border-border">
                 <p className="text-xs text-secondary truncate">
-                  {marketSentiment.reasoning.replace(/MOOD:[\s\S]*?REASONING:/i, '').trim()}
+                  {marketSentiment.reasoning.includes('REASONING:') 
+                    ? marketSentiment.reasoning.split('REASONING:')[1].trim() 
+                    : marketSentiment.reasoning.replace(/MOOD:.*REASONING:/i, '').trim()}
                 </p>
               </div>
             </div>
