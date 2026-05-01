@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #070b14;
+  --color-card: #0d1117;
+  --color-border: #1e2d3d;
+  --color-primary: #00ff88;
+  --color-secondary: #7d8590;
+  --color-muted: #484f58;
+  --color-foreground: #e6edf3;
+  --color-green: #00ff88;
+  --color-red: #ff3b5c;
+  --color-amber: #ffb800;
+  --color-blue: #4d9fff;
+  
+  --font-inter: var(--font-inter);
+  --font-mono: var(--font-ibm-plex-mono);
+}
+
+@layer base {
+  body {
+    background-color: #070b14;
+    color: #e6edf3;
+    font-family: var(--font-inter), sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono {
+    font-family: var(--font-ibm-plex-mono), monospace;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #070b14;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e2d3d;
+  border-radius: 2px;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #0d1117 25%, #1a1f2e 50%, #0d1117 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.animate-blink {
+  animation: blink 1s infinite;
+}
