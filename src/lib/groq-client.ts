@@ -23,27 +23,58 @@ export async function analyzeStockWithNews(
       messages: [
         {
           role: 'system',
-          content: `You are an expert Indian stock market analyst specializing in NSE and BSE equities. 
-          Provide structured, accurate analysis based on technical data and your knowledge of the company.
-          Always respond in this exact format with these section headers:
-          NEWS SENTIMENT | KEY CATALYSTS | RISK FACTORS | SHORT TERM OUTLOOK | MEDIUM TERM OUTLOOK | LONG TERM OUTLOOK | RECOMMENDATION`
+          content: `You are a senior Indian equity research analyst at a top Mumbai brokerage 
+          with 15 years experience. You give HONEST analysis — you are not a bull or bear, 
+          you follow the data. You have covered NSE/BSE markets through multiple cycles.
+          
+          Your analysis style:
+          - You call out overvalued stocks even if popular
+          - You identify hidden risks others miss
+          - You distinguish between different stock types
+          - You always mention position sizing and risk
+          - You never say BUY just to sound positive
+          - You compare current levels to historical ranges
+          - You mention FII/DII activity patterns for large caps
+          - You factor in sector tailwinds/headwinds`
         },
         {
           role: 'user',
-          content: `Analyze ${companyName} (${ticker}) listed on NSE/BSE India.
-          
-          Technical Summary: ${technicalSummary}
-          
-          Provide:
-          1. NEWS SENTIMENT: Current market sentiment and recent news impact
-          2. KEY CATALYSTS: Top 3 bullish factors driving the stock
-          3. RISK FACTORS: Top 3 risks to watch
-          4. SHORT TERM OUTLOOK (1-4 weeks): Price direction and key levels
-          5. MEDIUM TERM OUTLOOK (1-3 months): Trend and targets
-          6. LONG TERM OUTLOOK (6-12 months): Fundamental view
-          7. RECOMMENDATION: Final call with confidence percentage
-          
-          Base analysis on fundamental business knowledge of this Indian company and the technical data provided.`
+          content: `Analyze ${companyName} (${ticker}) for Indian retail investors.
+
+          Technical data: ${technicalSummary}
+
+          Provide HONEST analysis covering:
+
+          1. STOCK CHARACTER: What type of stock is this? 
+             (momentum/dividend/defensive/cyclical/news-driven/turnaround)
+             What drives this stock — earnings, news, FII flows, sector cycle?
+
+          2. CURRENT TECHNICAL PICTURE: 
+             Describe what the charts are actually saying — bullish, bearish or mixed?
+             Are there any warning signs even if trend looks up?
+             
+          3. KEY CATALYSTS (only real ones):
+             What specific upcoming events could move this stock?
+             Earnings date, sector policy, global factors?
+             
+          4. REAL RISKS (be specific):
+             - What could go wrong with this trade?
+             - Is the stock overextended or near resistance?
+             - Any fundamental concerns for this company?
+             
+          5. TIMEFRAME OUTLOOK:
+             SHORT (1-4 weeks): Specific price range expected
+             MEDIUM (1-3 months): Key level to watch
+             LONG (6-12 months): Only if fundamentals support
+             
+          6. HONEST RECOMMENDATION:
+             Give a clear call with specific entry zone, not just "looks good"
+             If mixed signals — say WAIT/AVOID clearly
+             Mention ideal position size (small/medium/full) based on conviction
+             
+             Format: CALL: [BUY/SELL/HOLD/AVOID] | ENTRY: ₹xxx-xxx | 
+             TARGET: ₹xxx | SL: ₹xxx | CONVICTION: [LOW/MEDIUM/HIGH] | 
+             POSITION: [25%/50%/FULL]`
         }
       ]
     });

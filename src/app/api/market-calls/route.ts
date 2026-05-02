@@ -13,14 +13,17 @@ export async function GET(req: NextRequest) {
   const timeframe = (searchParams.get("timeframe") as 'SHORT' | 'MEDIUM' | 'LONG') || 'SHORT';
 
   try {
-    // 1. Scan top 15 stocks to stay within free tier limits
-    const tickers = NSE_WATCHLIST.slice(0, 15);
+    // 1. Scan top 30 stocks
+    const tickers = NSE_WATCHLIST.slice(0, 30);
     
     const candidates = await Promise.all(
       tickers.map(async (ticker) => {
         try {
           const stockData = await getStockData(ticker);
+          if (!stockData) return null;
           const ohlcv = await getOHLCV(ticker, '3mo');
+          if (!ohlcv || ohlcv.length === 0) return null;
+          
           const indicators = getAllIndicators(ohlcv);
           const signal = generateTradeSignal(stockData, indicators, timeframe);
           
@@ -33,33 +36,48 @@ export async function GET(req: NextRequest) {
 
     const validCandidates = candidates.filter(c => c !== null);
 
-    // 2. Filter by signal strength/relevance to timeframe
-    // Lowered confidence threshold to 30
-    let filtered = validCandidates.filter(c => c!.signal.confidence >= 30);
-    
-    if (timeframe === 'SHORT') {
-      // Prioritize high RSI momentum or reversals
-      filtered = filtered.filter(c => c!.indicators.rsi14 > 60 || c!.indicators.rsi14 < 35);
-    } else if (timeframe === 'MEDIUM') {
-      // Prioritize trend following (Price > EMA50)
-      filtered = filtered.filter(c => c!.stockData.price > c!.indicators.ema50);
-    }
+    // 2. Strict Filtering
+    let filtered = validCandidates.filter(c => {
+      const s = c!.signal;
+      const price = c!.stockData.price;
+      
+      if (s.signal === 'HOLD') return false;
+      if (s.confidence < 55) return false;
+      if (s.riskReward < 2.0) return false;
+      
+      const slPercent = s.signal.includes('BUY') 
+        ? (price - s.stopLoss) / price 
+        : (s.stopLoss - price) / price;
+        
+      if (slPercent > 0.08) return false;
+      
+      return true;
+    });
 
-    // Always return minimum 5 stocks regardless of signal strength if possible
-    if (filtered.length < 5) {
-      filtered = validCandidates
-        .sort((a, b) => b!.signal.confidence - a!.signal.confidence)
-        .slice(0, 5);
-    }
+    // 3. Sort by primary: confidence descending, secondary: R:R descending
+    filtered.sort((a, b) => {
+      if (b!.signal.confidence !== a!.signal.confidence) {
+        return b!.signal.confidence - a!.signal.confidence;
+      }
+      return b!.signal.riskReward - a!.signal.riskReward;
+    });
 
-    // 3. Sort by confidence and take top 5 for deep AI analysis
-    const topCandidates = filtered
-      .sort((a, b) => b!.signal.confidence - a!.signal.confidence)
-      .slice(0, 5);
+    // 4. Cap SELL calls to maximum 3
+    let sellCount = 0;
+    filtered = filtered.filter(c => {
+      if (c!.signal.signal.includes('SELL')) {
+        sellCount++;
+        return sellCount <= 3;
+      }
+      return true;
+    });
+
+    // Take top 5 for deep AI analysis after all filters
+    const topCandidates = filtered.slice(0, 5);
 
     const marketCalls = await Promise.all(
       topCandidates.map(async (c) => {
-        const technicalSummary = `RSI: ${c!.indicators.rsi14.toFixed(2)}, Signal: ${c!.signal.signal}, Confidence: ${c!.signal.confidence}%`;
+        const technicalSummary = `RSI: ${c!.indicators.rsi14.toFixed(2)}, Signal: ${c!.signal.signal}, Confidence: ${c!.signal.confidence}%, Risk/Reward: ${c!.signal.riskReward.toFixed(2)}`;
         
         let aiAnalysis = "AI analysis unavailable. Technical signals active.";
         let newsItems: any[] = [];
@@ -84,7 +102,20 @@ export async function GET(req: NextRequest) {
       })
     );
 
-    return NextResponse.json(marketCalls);
+    const scanSummary = {
+      scanned: tickers.length,
+      passed_filters: filtered.length,
+      showing: topCandidates.length,
+      scan_time: new Date().toISOString(),
+      market_note: filtered.length > 0 
+        ? `${filtered.length} of ${tickers.length} stocks show actionable setups today.`
+        : `MARKET SCAN: No high-confidence setups today. Check back tomorrow or search specific stocks.`
+    };
+
+    return NextResponse.json({
+      summary: scanSummary,
+      calls: marketCalls
+    });
   } catch (error: any) {
     console.error("Market-calls API Error:", error);
     return NextResponse.json({ error: "Failed to scan market" }, { status: 500 });
