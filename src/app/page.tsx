@@ -15,27 +15,24 @@ export default function LoginPage() {
     }
   }, [router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
-
+    setError('');
     try {
-      const res = await fetch("/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
       });
-
-      if (res.ok) {
-        localStorage.setItem("mp_token", "authenticated");
-        document.cookie = "mp_auth=true; path=/; max-age=86400";
-        router.push("/dashboard");
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = '/dashboard';
       } else {
-        setError("Invalid Terminal Access Key");
+        setError('Invalid password. Try again.');
       }
-    } catch (err) {
-      setError("Connection failed");
+    } catch {
+      setError('Connection error. Try again.');
     } finally {
       setLoading(false);
     }
@@ -54,7 +51,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <label className="block text-[10px] font-bold text-muted uppercase tracking-widest mono">
                 Access Key
